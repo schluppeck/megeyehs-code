@@ -7,6 +7,8 @@
 %
 % check that ft_read_mri is a function (if yes, assume ft is on path)
 
+
+
 if exist('ft_read_mri') ~= 2
     disp('(uhoh) need to add fieldtrip to path')
     cwd = pwd();
@@ -24,9 +26,11 @@ end
 % NB: the surfRelax folder is derived from freesurfer segmentation
 % using a bunch of tools (mrTools) for fMRI analysis... denis uses this a
 % lot, so if any qustions come up, check in...
-datafolder = '../15909/surfRelax';
 
-M = ft_read_mri( fullfile(datafolder, '15909_mprage_pp.hdr'));
+participant = '15910';
+datafolder = fullfile('..', participant, 'surfRelax');
+
+M = ft_read_mri( fullfile(datafolder, sprintf('%s_mprage_pp.hdr', participant)));
 
 %% and display - many ways to skin a cat 
 
@@ -54,9 +58,9 @@ rotate3d() % switch on interaction
 %% can also try meshes... using Jonas Larsson's code
 % which is wrapped into mrTools distro
 
-figure()
-S = loadSurfOFF( fullfile(datafolder, '15909_left_WM.off'));
-curv = loadVFF( fullfile(datafolder, '15909_left_Curv.vff'));
+f_skull_ = figure()
+S = loadSurfOFF( fullfile(datafolder, sprintf('%s_left_WM.off', participant)));
+curv = loadVFF( fullfile(datafolder, sprintf('%s__left_Curv.vff', participant)));
 
 patch('vertices', S.vtcs, 'faces', S.tris,'facecolor', [0.8 0.2 0.2],'edgecolor','none');
 colormap(gray);
@@ -66,3 +70,14 @@ daspect([1 1 1]);
 axis('vis3d') % keep aspect ratios
 axis('off')
 rotate3d() % switch on interaction
+
+
+%% adding a transparent skull surface to this
+
+SKi = loadSurfOFF( fullfile(datafolder, sprintf('%s_outer_skin_surface.off', participant)));
+SKo = loadSurfOFF( fullfile(datafolder, sprintf('%s_outer_skull_surface.off', participant)));
+
+skin_patch_ = patch('vertices', SKi.vtcs, 'faces', SKi.tris,'facecolor', [0.1 0.3 0.3],'edgecolor','none');
+skull_patch_ = patch('vertices', SKo.vtcs, 'faces', SKo.tris,'facecolor', [0.1 0.1 0.3],'edgecolor','none');
+alpha(skull_patch_, 0.2)
+alpha(skin_patch_, 0.4)
